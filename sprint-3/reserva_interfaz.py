@@ -12,7 +12,6 @@ class ReservaInterfaz(QWidget):
         self.seccion = 'Reserva de habitación'
         self.tipo = None
 
-
         self.setWindowTitle("Reserva")
         self.setFixedSize(300, 200)
         self.setup_ui()
@@ -76,8 +75,19 @@ class ReservaInterfaz(QWidget):
         if self.nombre and self.tipo:
             
             try:
+                precio = None
+                if self.tipo == 'Ejecutiva Individual' :
+                    precio = '$50.000'
+                elif self.tipo == 'Ejecutiva Doble':
+                    precio = '$80.000'
+                elif self.tipo == 'Familiar':
+                    precio = '$150.000'
+                else:
+                    precio = '$1.080.000'
+
+
                 texto_csv = open('sprint-3\\archivo_reservas.csv', 'a')
-                texto_csv.write(f"'{self.nombre}', '{self.seccion}', '{self.tipo}'\n")
+                texto_csv.write(f"'{self.nombre}', '{self.seccion}', '{self.tipo}', {precio}\n")
                 texto_csv.close()
 
                 QMessageBox.information(self, "Reserva Exitosa", "Se ha realizado la reserva")

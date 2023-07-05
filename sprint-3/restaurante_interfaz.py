@@ -76,8 +76,20 @@ class RestauranteInterfaz(QWidget):
         if self.nombre and self.tipo:
             
             try:
+                precio = None
+                if self.tipo == 'Inicial' :
+                    precio = '$10.000'
+                elif self.tipo == 'Intermedio':
+                    precio = '$25.000'
+                elif self.tipo == 'Completo':
+                    precio = '$45.000'
+                elif self.tipo == 'Avanzado':
+                    precio = '$60.000'
+                else:
+                    precio = '$100.000'
+
                 texto_csv = open('sprint-3\\archivo_reservas.csv', 'a')
-                texto_csv.write(f"'{self.nombre}', '{self.seccion}', '{self.tipo}'\n")
+                texto_csv.write(f"'{self.nombre}', '{self.seccion}', '{self.tipo}', '{precio}'\n")
                 texto_csv.close()
 
                 QMessageBox.information(self, "Reserva Exitosa", 'Se ha realizado la reserva.')
@@ -88,8 +100,6 @@ class RestauranteInterfaz(QWidget):
 
             except Exception as e:
                 print(f'El archivo no se encuentra ... {e}')
-
-            
 
         else:
             QMessageBox.warning(self, "Error", "Por favor, complete el nombre y seleccione un plan.") 

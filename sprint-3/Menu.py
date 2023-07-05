@@ -16,11 +16,11 @@ class MainWindow(QMainWindow):
 
         widget = QWidget()
         layout = QHBoxLayout()
-        self.table = QTableWidget(0, 3)  
+        self.table = QTableWidget(0, 4)  
 
         #tabla
 
-        self.table.setHorizontalHeaderLabels(["Nombre", "Sección","Reserva"])
+        self.table.setHorizontalHeaderLabels(["Nombre", "Sección","Reserva", "Costo"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
 

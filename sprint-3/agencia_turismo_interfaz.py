@@ -27,10 +27,10 @@ class AgenciaTurismoInterfaz(QWidget):
         
         label_excursion = QLabel("Seleccione una Excursión:")
         self.combo_excursion = QComboBox()
-        self.combo_excursion.addItem("Tour por la Ciudad")
-        self.combo_excursion.addItem("Senderismo en el Bosque")
-        self.combo_excursion.addItem("Visita a las Playas")
-        self.combo_excursion.addItem("Tour de Aventura")
+        self.combo_excursion.addItem("Excursión Light")
+        self.combo_excursion.addItem("Excursión Plus")
+        self.combo_excursion.addItem("Excursión Heavy")
+        
         layout.addWidget(label_excursion)
         layout.addWidget(self.combo_excursion)
         
@@ -75,8 +75,17 @@ class AgenciaTurismoInterfaz(QWidget):
         if self.nombre and self.tipo:
             
             try:
+                precio = None
+                if self.tipo == 'Excursión Light' :
+                    precio = '$5.000'
+                
+                elif self.tipo == 'Excursión Plus':
+                    precio = '$25.000'
+                else:
+                    precio = '$50.000'
+                    
                 texto_csv = open('sprint-3\\archivo_reservas.csv', 'a')
-                texto_csv.write(f"'{self.nombre}', '{self.seccion}', '{self.tipo}'\n")
+                texto_csv.write(f"'{self.nombre}', '{self.seccion}', '{self.tipo}', '{precio}'\n")
                 texto_csv.close()
 
                 QMessageBox.information(self, "Reserva Exitosa", 'Se ha realizado la reserva.')
