@@ -2,20 +2,20 @@ from PyQt6.QtWidgets import QWidget, QLabel, QDateEdit, QLineEdit, QComboBox, QP
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtCore import QDate
 
-class ReservaInterfaz(QWidget):
+class ActualizarReservaInterfaz(QWidget):
 
     mi_signal = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, posicion_tabla):
         super().__init__()
         
         self.nombre = None
         self.reserva_habitacion = None
         self.reserva_excursion = None
         self.reserva_restaurante = None
-        
+        self.linea_tabla = posicion_tabla
 
-        self.setWindowTitle("Reserva")
+        self.setWindowTitle("Actualizar reserva")
         self.setFixedSize(300, 400)
         self.setup_ui()
     
@@ -24,7 +24,20 @@ class ReservaInterfaz(QWidget):
         
         #nombre de la persona
         label_nombre = QLabel("Nombre de la Persona:")
+
+        #Se busca el nombre de la persona de la reserva para 
+        #actualizar.
+        with open('sprint-3\\archivo_reservas.csv', 'r') as file:
+            lineas = file.readlines()
+            datos = lineas[self.linea_tabla].split(',')
+            nombre_reserva = datos[0].replace("'", "")
+
+        #se agrega el nombre de la persona y se coloca en el QLineEdit sin posibilidad
+        # de ser cambiado 
         self.input_nombre = QLineEdit()
+        self.input_nombre.setReadOnly(True)
+        self.input_nombre.setText(nombre_reserva)
+
         layout.addWidget(label_nombre, 0,0, 1,2)
         layout.addWidget(self.input_nombre, 1,0, 1,2)
 
@@ -89,44 +102,41 @@ class ReservaInterfaz(QWidget):
         button_cancelar.clicked.connect(self.close)
         layout.addWidget(button_cancelar, 13,0, 2,1)
 
-        button_reservar = QPushButton("Realizar Reserva")
-        button_reservar.clicked.connect(self.agregar_reserva)
+        button_reservar = QPushButton("Actualizar Reserva")
+        button_reservar.clicked.connect(self.agregar_nueva_reserva)
         layout.addWidget(button_reservar, 13,1, 2,1)
 
 
         self.setLayout(layout)
 
+
     #Añade la reserva con los datos nombre, habitacion, excursion y plan de restaurante seleccionados.
     #Se asigna el correspondiente valor a cada opción seleccionada y se suma para dar el total.
     #Estos datos se guardan en el archivo csv.
     
-    def agregar_reserva(self):
+    def agregar_nueva_reserva(self):
+            
         self.nombre = self.input_nombre.text()
         self.reserva_habitacion = self.combo_habitacion.currentText()
         self.reserva_excursion = self.combo_excursion.currentText()
         self.reserva_restaurante = self.combo_plan.currentText()
 
+        
+
         for i in self.nombre:
             if i in '0123456789':
-                return QMessageBox.warning(self, "Error", "Por favor, ingrese un nombre sin números.") and self.input_nombre.clear()
+                return QMessageBox.warning(self, "Error", "Por favor, ingrese un dato valido.") and self.input_nombre.clear()
         
         for i in self.nombre:
             if i in ''''!"#$%&/()=?¡¿@,;.:-{[]^}<>¨´*+~´''':
-                return QMessageBox.warning(self, "Error", "Por favor, ingrese un dato valido como nombre.") and self.input_nombre.clear()
+                return QMessageBox.warning(self, "Error", "Por favor, ingrese un dato valido.") and self.input_nombre.clear()
         
-        if self.nombre:
-            nombre_para_reservar = f"'{self.nombre}'"
-            
-            with open('sprint-3\\archivo_reservas.csv', 'r') as archivo_origen:
-                    for linea in archivo_origen:
-                        if nombre_para_reservar in linea:
-                            return QMessageBox.warning(self, "Error", "Esta persona ya tiene una reserva.") and self.input_nombre.clear()
-                        
-        #comprueba si la fecha de inicio no es mayor que la fecha final de la reserva
+                   
+        
         if self.nombre and self.final_fecha.date() > self.inicio_fecha.date():
             
             try:
-
+                 
                 precio_reserva_habitacion = 0
 
                 if self.reserva_habitacion == 'Ejecutiva Individual ($50.000)' :
@@ -158,28 +168,25 @@ class ReservaInterfaz(QWidget):
                     precio_reserva_restaurante = 60000
                 elif self.reserva_restaurante == 'Premium ($100.000)':
                     precio_reserva_restaurante = 100000
-
+                    
                 
                 costo_total = precio_reserva_habitacion * self.diferencia_dias() + precio_reserva_restaurante + precio_reserva_excursion
                 costo_total_str = "${:,.0f}".format(costo_total).replace(",", ".")
+                linea_nueva = f"'{self.nombre}', 'Habitación: {self.reserva_habitacion} | Excursión: {self.reserva_excursion} | Restaurante: {self.reserva_restaurante}', '{self.inicio_fecha.date().toString('dd/MM/yyyy')}', '{self.final_fecha.date().toString('dd/MM/yyyy')}','{self.diferencia_dias()}','{costo_total_str}'\n"
+                self.modificar_linea(self.linea_tabla, linea_nueva) 
 
-                texto_csv = open('sprint-3\\archivo_reservas.csv', 'a')
-                texto_csv.write(f"'{self.nombre}', 'Habitación: {self.reserva_habitacion} | Excursión: {self.reserva_excursion} | Restaurante: {self.reserva_restaurante}', '{self.inicio_fecha.date().toString('dd/MM/yyyy')}', '{self.final_fecha.date().toString('dd/MM/yyyy')}','{self.diferencia_dias()}','{costo_total_str}'\n")
-                texto_csv.close()
-
-                QMessageBox.information(self, "Reserva Exitosa", "Se ha realizado la reserva")
+                QMessageBox.information(self, "Reserva Exitosa", "Se ha actualizado la reserva")
                 
                 self.mi_signal.emit()
                 self.input_nombre.clear()
                 self.close()
 
             except Exception as e:
-                print(self.final_fecha.date())
                 print(f'El archivo no se encuentra ... {e}')
 
         else:
             QMessageBox.warning(self, "Error", "Verifique que la fecha de inicio y final sean correctas") 
-
+   
     #obtiene la difencia de dias para calcular los días de estadía 
     def diferencia_dias(self):
         inicio = self.inicio_fecha.date()
@@ -188,6 +195,22 @@ class ReservaInterfaz(QWidget):
         if inicio.isValid() and final.isValid():
             diferencia = inicio.daysTo(final)
             return diferencia
+        
+    #sobreescribe una linea en el archivo csv, la nueva  linea se pasa como parametro
+    #junto con el indice de la linea que se quiere modificar
+    def modificar_linea(self, linea_index, nueva_linea):
+        with open('sprint-3\\archivo_reservas.csv', 'r') as file:
+            lineas = file.readlines()
+
+        if linea_index < 0 or linea_index >= len(lineas):
+            print("Índice de línea inválido", linea_index, len(lineas))
+            return
+
+        lineas[linea_index] = nueva_linea
+
+        with open('sprint-3\\archivo_reservas.csv', 'w') as file:
+            file.writelines(lineas)
+
         
     
         
