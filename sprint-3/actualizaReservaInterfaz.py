@@ -66,7 +66,7 @@ class ActualizarReservaInterfaz(QWidget):
         self.combo_habitacion.addItem("Ejecutiva Individual ($50.000)")
         self.combo_habitacion.addItem("Ejecutiva Doble ($80.000)")
         self.combo_habitacion.addItem("Familiar ($150.000)")
-        self.combo_habitacion.addItem("PentHouse Volcanes ($150.000)")
+        self.combo_habitacion.addItem("PentHouse Volcanes ($1.080.000)")
         self.combo_habitacion.addItem("PentHouse Pacífico ($1.080.000)")
         layout.addWidget(label_habitacion, 6,0, 1,2)
         layout.addWidget(self.combo_habitacion, 7,0, 1,2)
